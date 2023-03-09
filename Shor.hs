@@ -2,8 +2,8 @@ module Shor where
 
 -- Example
 
-shor :: Integer -> Integer -> Integer -> Integer
-shor n a r = qft [ (x , f x) | x <- [0..d] , f(x) == r ]
+shor :: Integer -> Integer -> Integer 
+shor n a = qft [ (x , f x) | x <- [0..d] , f(x) == 1 ]
   where f x = (a ^ x) `mod` n
         d = floor (logBase 2 (fromInteger n ^ 2))
         qft ps = fst $ head (tail ps)
