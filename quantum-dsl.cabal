@@ -1,0 +1,13 @@
+cabal-version: 1.24
+build-type: Custom
+
+name: quantum-dsl
+version: 0.0.0.0
+
+executable Simon
+  main-is: Simon.hs
+  build-depends: base, quipper-utils, quipper-language, quipper-libraries
+  default-language: Haskell2010
+
+custom-setup
+  setup-depends: base, Cabal, quipper-cabal

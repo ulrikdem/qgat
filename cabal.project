@@ -1,0 +1,3 @@
+packages:
+  quantum-dsl.cabal,
+  quipper/*/*.cabal

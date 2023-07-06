@@ -1,0 +1,3 @@
+[submodule "quipper"]
+	path = quipper
+	url = https://github.com/ulrikdem/quipper.git
