@@ -5,7 +5,7 @@ name: quantum-dsl
 version: 0.0.0.0
 
 common depends
-  build-depends: base, quipper-utils, quipper-language, quipper-libraries
+  build-depends: base, quipper-utils, quipper-language, quipper-libraries, quipper-algorithms
   default-language: Haskell2010
 
 common example

@@ -3,6 +3,7 @@
 module QuantumDsl where
 
 import Quipper
+import Quipper.Internal.Generic
 import Quipper.Libraries.Simulation
 
 type PredicateCirc a = Circ (a -> Circ Qubit)
@@ -12,15 +13,17 @@ generate d = do
   q <- qinit $ replicate d False
   map_hadamard q
 
-apply_phase :: PredicateCirc a -> a -> Circ ()
-apply_phase f x = do
-  a <- qinit True
-  hadamard_at a
-  with_computed (unpack f x) (controlled_not_at a)
+apply :: (CircLiftingUnpack packed fun, QCurry fun args qc, QCData qc) => packed -> fun
+apply f = qcurry $ \x -> with_computed (quncurry (unpack f) x) qc_copy
+
+apply_phase :: (CircLiftingUnpack packed fun, QCurry fun args Qubit, QCurry fun' args ()) => packed -> fun'
+apply_phase f = qcurry $ \x -> do
+  a <- qinit_plusminus True
+  with_computed (quncurry (unpack f) x) (controlled_not_at a)
   qdiscard a
 
-test :: (QData qa) => qa -> Circ ()
-test = qdiscard
+test :: (QShape ba qa ca) => qa -> Circ ca
+test = measure
 
 approx_qft :: (QData qa) => qa -> Circ qa
 approx_qft = map_hadamard

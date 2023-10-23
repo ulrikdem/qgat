@@ -1,22 +1,28 @@
+import Data.List
+
 import QuantumDsl
 import Quipper
+import Quipper.Algorithms.BF.Hex
+import Quipper.Utils.Auxiliary
 
-simon :: [Bool] -> Circ Qulist
+build_circuit
+f :: Int -> [BoolParam] -> [Bool] -> [Bool]
+f i b x = if x !! i then zipWith bool_xor x $ newBools b else x where
+
+oracle :: [BoolParam] -> Qulist -> Circ Qulist
+oracle b = case elemIndex PTrue b of
+  Just i -> apply template_f i b
+  Nothing -> return
+
+simon :: [BoolParam] -> Circ Qulist
 simon b = do
   x <- generate $ length b
-  (x, y) <- apply_f b x
+  y <- oracle b x
   test y
   approx_qft x
 
-apply_f :: [Bool] -> Qulist -> Circ (Qulist, Qulist)
-apply_f b x = do
-  y <- qinit $ replicate (length b) False
-  (y, x) <- controlled_not y x
-  y <- bool_controlled_not y b `controlled` head x
-  return (x, y)
-
 circuit :: Circ Qulist
-circuit = simon [True, False, True]
+circuit = simon [PTrue, PFalse, PTrue]
 
 -- main = preview_circuit circuit
 main = simulate_circuit circuit
