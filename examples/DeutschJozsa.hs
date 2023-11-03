@@ -2,23 +2,26 @@ import QuantumDsl
 import Quipper
 import Quipper.Utils.Auxiliary
 
-deutsch_jozsa :: Int -> PredicateCirc Qulist -> Circ Qulist
-deutsch_jozsa d f = do
-  x <- generate d
-  apply_phase f x
-  approx_qft x
+deutschJozsa :: Int -> Oracle a a' -> Program a a' FourierExpansion
+deutschJozsa d f = Program
+  { generateBits = d
+  , applyOracle = f
+  , query = FourierExpansion
+  }
 
-build_circuit
-constant :: [Bool] -> Bool
-constant x = True
+buildOracle [d|
+  constant :: [Bool] -> Bool
+  constant x = True
+  |]
 
-build_circuit
-balanced :: [Bool] -> Bool
-balanced x = foldl bool_xor False x
+buildOracle [d|
+  balanced :: [Bool] -> Bool
+  balanced x = foldl bool_xor False x
+  |]
 
 circuit :: Circ Qulist
--- circuit = deutsch_jozsa 4 template_constant
-circuit = deutsch_jozsa 4 template_balanced
+-- circuit = toCircuit $ deutschJozsa 4 oracle_constant
+circuit = toCircuit $ deutschJozsa 4 oracle_balanced
 
--- main = preview_circuit circuit
-main = simulate_circuit circuit
+-- main = previewCircuit circuit
+main = simulateCircuit circuit
