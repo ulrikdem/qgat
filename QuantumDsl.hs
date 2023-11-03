@@ -1,12 +1,89 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 
 module QuantumDsl where
 
+import Data.Maybe
+import Language.Haskell.TH
+
 import Quipper
 import Quipper.Internal.Generic
+import Quipper.Libraries.Arith
+import Quipper.Libraries.QFT
 import Quipper.Libraries.Simulation
 
-type PredicateCirc a = Circ (a -> Circ Qubit)
+data Oracle a a' = Oracle a (Circ a')
+
+buildOracle :: Q [Dec] -> Q [Dec]
+buildOracle decs = do
+  decs' <- decs
+  templates <- decToCircMonad decs
+  let getName (FunD n _) = Just n
+      getName (ValD (VarP n) _ _) = Just n
+      getName _ = Nothing
+      names = mapMaybe getName decs'
+      f n = [d| $(varP $ mkName $ "oracle_" ++ nameBase n) = Oracle $(varE n) $(varE $ mkName $ "template_" ++ nameBase n) |]
+  oracles <- mapM f names
+  return $ decs' ++ templates ++ concat oracles
+
+applyParam :: (Oracle (Param a -> b) (Param a -> Circ b')) -> a -> Oracle b b'
+applyParam (Oracle f f') x = Oracle (f $ Param x) (f' >>= ($ Param x))
+
+-- class OracleClass be f a b where
+--   apply' :: be -> f -> a -> b
+
+-- instance (QCData b) => OracleClass Quantum (Oracle f (a -> Circ b)) a (Circ b) where
+--   apply' _ (Oracle _ f) x = with_computed (f >>= ($ x)) qc_copy
+
+-- instance OracleClass Classical (Oracle (a -> b) f) a b where
+--   apply' _ (Oracle f _) = f
+
+data Program a a' q = Program
+  { generateBits :: Int
+  , applyOracle :: Oracle a a'
+  , query :: q
+  }
+
+class (Monad m) => Backend be m b where
+  generate' :: be -> Int -> m [b]
+
+-- data Quantum = Quantum
+-- data Classical = Classical
+
+-- instance Backend Quantum Circ Qubit where
+--   generate' _ d = do
+--     q <- qinit $ replicate d False
+--     map_hadamard q
+
+-- instance Backend Classical [] Bool where
+--   generate' _ 0 = []
+--   generate' be n = [b:bs | b <- [False, True], bs <- generate' be $ n - 1]
+
+class Query q a b c where
+  toCircuit :: Program f (a -> Circ b) q -> Circ c
+
+data FourierExpansion = FourierExpansion
+instance Query FourierExpansion Qulist Qubit Qulist where
+  toCircuit (Program d (Oracle _ f) _) = do
+    x <- generate d
+    applyPhase f x
+    map_hadamard x
+
+data Period = Period
+instance Query Period QDInt QDInt QDInt where
+  toCircuit (Program d (Oracle _ f) _) = do
+    x <- generate d
+    let x' = xint_of_list_lh x
+    y <- apply f x'
+    qdiscard y
+    qft_int x'
+
+data BitwisePeriod = BitwisePeriod
+instance Query BitwisePeriod Qulist Qulist Qulist where
+  toCircuit (Program d (Oracle _ f) _) = do
+    x <- generate d
+    y <- apply f x
+    qdiscard y
+    map_hadamard x
 
 generate :: Int -> Circ Qulist
 generate d = do
@@ -16,19 +93,13 @@ generate d = do
 apply :: (CircLiftingUnpack packed fun, QCurry fun args qc, QCData qc) => packed -> fun
 apply f = qcurry $ \x -> with_computed (quncurry (unpack f) x) qc_copy
 
-apply_phase :: (CircLiftingUnpack packed fun, QCurry fun args Qubit, QCurry fun' args ()) => packed -> fun'
-apply_phase f = qcurry $ \x -> do
+applyPhase :: (CircLiftingUnpack packed fun, QCurry fun args Qubit, QCurry fun' args ()) => packed -> fun'
+applyPhase f = qcurry $ \x -> do
   a <- qinit_plusminus True
-  with_computed (quncurry (unpack f) x) (controlled_not_at a)
+  with_computed (quncurry (unpack f) x) $ controlled_not_at a
   qdiscard a
 
-test :: (QShape ba qa ca) => qa -> Circ ca
-test = measure
+previewCircuit :: Circ a -> IO ()
+previewCircuit = print_simple Preview
 
-approx_qft :: (QData qa) => qa -> Circ qa
-approx_qft = map_hadamard
-
-preview_circuit :: Circ a -> IO ()
-preview_circuit = print_simple Preview
-
-simulate_circuit circuit = putStrLn $ show $ sim_generic (0 :: Double) circuit
+simulateCircuit circuit = putStrLn $ show $ sim_generic (0 :: Double) circuit
