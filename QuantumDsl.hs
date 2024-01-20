@@ -28,35 +28,11 @@ buildOracle decs = do
 applyParam :: (Oracle (Param a -> b) (Param a -> Circ b')) -> a -> Oracle b b'
 applyParam (Oracle f f') x = Oracle (f $ Param x) (f' >>= ($ Param x))
 
--- class OracleClass be f a b where
---   apply' :: be -> f -> a -> b
-
--- instance (QCData b) => OracleClass Quantum (Oracle f (a -> Circ b)) a (Circ b) where
---   apply' _ (Oracle _ f) x = with_computed (f >>= ($ x)) qc_copy
-
--- instance OracleClass Classical (Oracle (a -> b) f) a b where
---   apply' _ (Oracle f _) = f
-
 data Program a a' q = Program
   { generateBits :: Int
   , applyOracle :: Oracle a a'
   , query :: q
   }
-
-class (Monad m) => Backend be m b where
-  generate' :: be -> Int -> m [b]
-
--- data Quantum = Quantum
--- data Classical = Classical
-
--- instance Backend Quantum Circ Qubit where
---   generate' _ d = do
---     q <- qinit $ replicate d False
---     map_hadamard q
-
--- instance Backend Classical [] Bool where
---   generate' _ 0 = []
---   generate' be n = [b:bs | b <- [False, True], bs <- generate' be $ n - 1]
 
 class Query q a b c where
   toCircuit :: Program f (a -> Circ b) q -> Circ c
