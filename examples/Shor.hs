@@ -1,6 +1,6 @@
 import Control.Monad
 
-import QuantumDsl
+import QGAT
 import Quipper
 import Quipper.Libraries.Arith
 

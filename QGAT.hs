@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 
-module QuantumDsl where
+module QGAT where
 
 import Data.Maybe
 import Language.Haskell.TH

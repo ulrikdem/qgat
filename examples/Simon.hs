@@ -1,6 +1,6 @@
 import Data.List
 
-import QuantumDsl
+import QGAT
 import Quipper
 import Quipper.Algorithms.BF.Hex
 import Quipper.Utils.Auxiliary

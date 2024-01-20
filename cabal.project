@@ -1,3 +1,3 @@
 packages:
-  quantum-dsl.cabal,
+  qgat.cabal,
   quipper/*/*.cabal

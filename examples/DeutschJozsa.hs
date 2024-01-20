@@ -1,4 +1,4 @@
-import QuantumDsl
+import QGAT
 import Quipper
 import Quipper.Utils.Auxiliary
 

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
-name: quantum-dsl
+name: qgat
 version: 0.0.0.0
 
 common depends
@@ -10,12 +10,12 @@ common depends
 
 common example
   import: depends
-  build-depends: quantum-dsl
+  build-depends: qgat
   hs-source-dirs: examples
 
 library
   import: depends
-  exposed-modules: QuantumDsl
+  exposed-modules: QGAT
 
 executable BernsteinVazirani
   import: example
