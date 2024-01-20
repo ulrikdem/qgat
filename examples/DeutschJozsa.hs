@@ -24,4 +24,5 @@ circuit :: Circ Qulist
 circuit = toCircuit $ deutschJozsa 4 oracle_balanced
 
 -- main = previewCircuit circuit
+-- main = countGates circuit
 main = simulateCircuit circuit

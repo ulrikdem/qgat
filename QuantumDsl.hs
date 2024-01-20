@@ -75,7 +75,8 @@ applyPhase f = qcurry $ \x -> do
   with_computed (quncurry (unpack f) x) $ controlled_not_at a
   qdiscard a
 
-previewCircuit :: Circ a -> IO ()
+previewCircuit, countGates :: Circ a -> IO ()
 previewCircuit = print_simple Preview
+countGates = print_simple GateCount
 
-simulateCircuit circuit = putStrLn $ show $ sim_generic (0 :: Double) circuit
+simulateCircuit circuit = print $ sim_generic (0 :: Double) circuit

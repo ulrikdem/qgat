@@ -23,4 +23,5 @@ circuit :: Circ Qulist
 circuit = toCircuit $ simon [True, False, True]
 
 -- main = previewCircuit circuit
+-- main = countGates circuit
 main = simulateCircuit circuit

@@ -18,4 +18,5 @@ circuit :: Circ Qulist
 circuit = toCircuit $ bernsteinVazirani [True, False, True, False]
 
 -- main = previewCircuit circuit
+-- main = countGates circuit
 main = simulateCircuit circuit
