@@ -1,6 +1,6 @@
 import Control.Monad
 
-import QuantumDsl
+import QGAT
 import Quipper
 import Quipper.Libraries.Arith
 
@@ -28,4 +28,5 @@ circuit :: Circ QDInt
 circuit = toCircuit $ shor 15 2
 
 -- main = previewCircuit circuit
+-- main = countGates circuit
 main = simulateCircuit circuit
