@@ -4,6 +4,9 @@ import QGAT
 import Quipper
 import Quipper.Libraries.Arith
 
+template_mod :: Circ (QDInt -> Circ (QDInt -> Circ QDInt))
+template_mod = return $ \x -> return $ \y -> do (x, y, z) <- q_mod_unsigned x y; return z
+
 buildOracle [d|
   mulMod :: IntM -> IntM -> IntM -> IntM
   mulMod n x y = x * y `mod` n
