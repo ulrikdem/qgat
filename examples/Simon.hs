@@ -19,9 +19,9 @@ simon b = Program
   , query = BitwisePeriod
   }
 
-circuit :: Circ Qulist
-circuit = toCircuit $ simon [True, False, True]
+program :: Program BitwisePeriod
+program = simon [True, False, True]
 
--- main = previewCircuit circuit
--- main = countGates circuit
-main = simulateCircuit circuit
+-- main = previewCircuit program
+-- main = countGates program
+main = print $ simulateCircuit program

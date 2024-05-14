@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts, TypeFamilies, TypeOperators #-}
 
 module QGAT where
 
@@ -7,6 +7,7 @@ import Language.Haskell.TH
 
 import Quipper
 import Quipper.Internal.Generic
+import Quipper.Internal.QData
 import Quipper.Libraries.Arith
 import Quipper.Libraries.QFT
 import Quipper.Libraries.Simulation
@@ -86,8 +87,10 @@ applyPhase f = qcurry $ \x -> do
   with_computed (quncurry (unpack f) x) $ controlled_not_at a
   qdiscard a
 
-previewCircuit, countGates :: Circ a -> IO ()
-previewCircuit = print_simple Preview
-countGates = print_simple GateCount
+previewCircuit, countGates :: (Query q) => Program q -> IO ()
+previewCircuit = print_simple Preview . toCircuit
+countGates = print_simple GateCount . toCircuit
 
-simulateCircuit circuit = print $ sim_generic (0 :: Double) circuit
+simulateCircuit :: (Query q, QData (CircOutput q), QCType Qubit Bool (CType (CircOutput q)) ~ BType (CircOutput q))
+                => Program q -> ProbabilityDistribution Double (BType (CircOutput q))
+simulateCircuit = sim_generic (0 :: Double) . toCircuit

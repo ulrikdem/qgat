@@ -14,9 +14,9 @@ bernsteinVazirani s = Program
   , query = FourierExpansion
   }
 
-circuit :: Circ Qulist
-circuit = toCircuit $ bernsteinVazirani [True, False, True, False]
+program :: Program FourierExpansion
+program = bernsteinVazirani [True, False, True, False]
 
--- main = previewCircuit circuit
--- main = countGates circuit
-main = simulateCircuit circuit
+-- main = previewCircuit program
+-- main = countGates program
+main = print $ simulateCircuit program

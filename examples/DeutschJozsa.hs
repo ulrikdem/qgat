@@ -19,10 +19,10 @@ buildOracle [d|
   balanced x = foldl bool_xor False x
   |]
 
-circuit :: Circ Qulist
--- circuit = toCircuit $ deutschJozsa 4 oracle_constant
-circuit = toCircuit $ deutschJozsa 4 oracle_balanced
+program :: Program FourierExpansion
+-- program = deutschJozsa 4 oracle_constant
+program = deutschJozsa 4 oracle_balanced
 
--- main = previewCircuit circuit
--- main = countGates circuit
-main = simulateCircuit circuit
+-- main = previewCircuit program
+-- main = countGates program
+main = print $ simulateCircuit program

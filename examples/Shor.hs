@@ -27,9 +27,9 @@ shor n a = Program
   , query = Period
   } where d = ceiling $ 2 * logBase 2 (fromInteger n)
 
-circuit :: Circ QDInt
-circuit = toCircuit $ shor 15 2
+program :: Program Period
+program = shor 15 2
 
--- main = previewCircuit circuit
--- main = countGates circuit
-main = simulateCircuit circuit
+-- main = previewCircuit program
+-- main = countGates program
+main = print $ simulateCircuit program
