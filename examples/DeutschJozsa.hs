@@ -2,7 +2,7 @@ import QGAT
 import Quipper
 import Quipper.Utils.Auxiliary
 
-deutschJozsa :: Int -> Oracle a a' -> Program a a' FourierExpansion
+deutschJozsa :: Int -> OracleFor FourierExpansion -> Program FourierExpansion
 deutschJozsa d f = Program
   { generateBits = d
   , applyOracle = f

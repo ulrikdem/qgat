@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, TypeFamilies #-}
 
 module QGAT where
 
@@ -28,24 +28,32 @@ buildOracle decs = do
 applyParam :: (Oracle (Param a -> b) (Param a -> Circ b')) -> a -> Oracle b b'
 applyParam (Oracle f f') x = Oracle (f $ Param x) (f' >>= ($ Param x))
 
-data Program a a' q = Program
+data (Query q) => Program q = Program
   { generateBits :: Int
-  , applyOracle :: Oracle a a'
+  , applyOracle :: OracleFor q
   , query :: q
   }
 
-class Query q a b c where
-  toCircuit :: Program f (a -> Circ b) q -> Circ c
+class Query q where
+  type OracleFor q
+  type CircOutput q
+  toCircuit :: Program q -> Circ (CircOutput q)
 
 data FourierExpansion = FourierExpansion
-instance Query FourierExpansion Qulist Qubit Qulist where
+instance Query FourierExpansion where
+  type OracleFor _ = Oracle ([Bool] -> Bool) (Qulist -> Circ Qubit)
+  type CircOutput _ = Qulist
+
   toCircuit (Program d (Oracle _ f) _) = do
     x <- generate d
     applyPhase f x
     map_hadamard x
 
 data Period = Period
-instance Query Period QDInt QDInt QDInt where
+instance Query Period where
+  type OracleFor _ = Oracle (IntM -> IntM) (QDInt -> Circ QDInt)
+  type CircOutput _ = QDInt
+
   toCircuit (Program d (Oracle _ f) _) = do
     x <- generate d
     let x' = xint_of_list_lh x
@@ -54,7 +62,10 @@ instance Query Period QDInt QDInt QDInt where
     qft_int x'
 
 data BitwisePeriod = BitwisePeriod
-instance Query BitwisePeriod Qulist Qulist Qulist where
+instance Query BitwisePeriod where
+  type OracleFor _ = Oracle ([Bool] -> [Bool]) (Qulist -> Circ Qulist)
+  type CircOutput _ = Qulist
+
   toCircuit (Program d (Oracle _ f) _) = do
     x <- generate d
     y <- apply f x

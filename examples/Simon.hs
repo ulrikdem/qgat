@@ -12,7 +12,7 @@ buildOracle [d|
     _ -> x
   |]
 
-simon :: [Bool] -> Program ([Bool] -> [Bool]) (Qulist -> Circ Qulist) BitwisePeriod
+simon :: [Bool] -> Program BitwisePeriod
 simon b = Program
   { generateBits = length b
   , applyOracle = oracle_f `applyParam` b

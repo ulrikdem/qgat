@@ -7,7 +7,7 @@ buildOracle [d|
   dot s x = foldl bool_xor False $ zipWith (&&) x $ getParam s
   |]
 
-bernsteinVazirani :: [Bool] -> Program ([Bool] -> Bool) (Qulist -> Circ Qubit) FourierExpansion
+bernsteinVazirani :: [Bool] -> Program FourierExpansion
 bernsteinVazirani s = Program
   { generateBits = length s
   , applyOracle = oracle_dot `applyParam` s

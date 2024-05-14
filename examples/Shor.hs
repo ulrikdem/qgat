@@ -20,7 +20,7 @@ buildOracle [d|
     f (a, y) b = (liftP3 mulMod n a a, if b then mulMod n' y (getParam a) else y)
   |]
 
-shor :: Integer -> Integer -> Program (IntM -> IntM) (QDInt -> Circ QDInt) Period
+shor :: Integer -> Integer -> Program Period
 shor n a = Program
   { generateBits = d
   , applyOracle = oracle_powMod `applyParam` d `applyParam` intm d n `applyParam` intm d a
